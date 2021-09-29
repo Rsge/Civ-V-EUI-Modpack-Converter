@@ -14,8 +14,13 @@ os.chdir("../..")
 ##Global Values
 print("Configuring variables...")
 #Names
+# Customize according to your setup here #
+vanilla_eui_zip = "!EUI.7z" # Vanilla EUI file (in vanilla_packs_folder)
+modded_eui_zip = "!EUI_CUC.7z" # CUC-version file name of EUI
+modsave_folder = "zzz_Modsaves" # Folder containing this scripts project folder and it's needed edited files
+vanilla_packs_folder = "zz_Vanilla_Versions" # Folder containing the vanilla packs
+# Don't change from here [if you don't really know what you're doing that is of cause ;)] #
 modpack_folder_name = "MP_MODSPACK"
-modded_eui_zip_name = "EUI_CUC.7z"
 eui_cu_file_names = ["CityBannerManager.lua",
                      "CityView.lua",
                      "Highlights.xml"]
@@ -31,18 +36,18 @@ unit_panel_modcompat_file_names = ["EvilSpiritsMission.lua",
                                    "THTanukiMission.lua"]
 #Paths
 base_path = os.getcwd()
-modsave_path = j(base_path, "zzz_Modsaves")
+modsave_path = j(base_path, modsave_folder)
 modpack_path = j(base_path, modpack_folder_name)
-vanilla_packs_path =  j(base_path, "zz_Vanilla_Versions")
+vanilla_packs_path =  j(base_path, vanilla_packs_folder)
 ui_path = j(modpack_path, "UI")
 eui_path = j(base_path, "UI_bc1")
 szip = r"C:\Program Files\7-Zip\7z.exe"
 #Files
+base_eui_zip_path = j(vanilla_packs_path, vanilla_eui_zip)
+modded_eui_zip_path = j(base_path, modded_eui_zip)
 mod_files = j(modpack_path, "Mods", "**", "*.lua")
 ui_files = j(ui_path, "*.lua")
 eui_files = j(eui_path, "*", "*.lua")
-base_eui_zip = j(vanilla_packs_path, "0EUI.7z")
-modded_eui_zip_path = j(base_path, modded_eui_zip_name)
 
 #Global Variables
 load_tags = {}
@@ -70,14 +75,14 @@ if os.path.isdir(eui_path):
 #Compile EUI with colored unlocked citizens
 if not os.path.isfile(modded_eui_zip_path):
     print("Creating colored unlocked Citizens EUI...")
-    subprocess.run([szip, 'x', base_eui_zip], stdout=null, stderr=null)
+    subprocess.run([szip, 'x', base_eui_zip_path], stdout=null, stderr=null)
     #shutil.move(j(vanilla_packs_path, eui_file_name), eui_path)
     for eui_cu_file_name in eui_cu_file_names:
         eui_cu_file = g(j(modsave_path, eui_cu_file_name + "*"))[0]
         orig_eui_file = g(j(eui_path, "*", eui_cu_file_name))[0]
         shutil.move(orig_eui_file, orig_eui_file + ".orig")
         shutil.copyfile(eui_cu_file, orig_eui_file)
-    subprocess.run([szip, 'a', modded_eui_zip_name, eui_path], stdout=null, stderr=null)
+    subprocess.run([szip, 'a', modded_eui_zip, eui_path], stdout=null, stderr=null)
 else:
     #Unzip EUI
     print("Unzipping EUI...")
