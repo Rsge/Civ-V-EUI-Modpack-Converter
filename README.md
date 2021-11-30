@@ -1,4 +1,4 @@
-# EUI Converter
+# Civilization V EUI Modpack Converter
 A script for Civilization V to add Colored Unlocked Citizens (CUC) to Enhanced User Interface (EUI) and EUI to MPMPM modpacks.
 The following things are assumed when running the script without changes:
 * Having [7-zip](https://www.7-zip.org/) installed in the standard programs directory.
