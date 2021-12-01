@@ -193,6 +193,8 @@ subprocess.run([szip, 'a', modpack_name + "_EUI.7z", modpack_path], stdout=null,
 #print("Moving Modspack folder")
 #shutil.move(modpack_path, j(base_path, modpack_folder_name))
 
+#Finishing up
 null.close()
 print("Done.\n")
+input("Press Enter to exit. . .")
 exit(0)
