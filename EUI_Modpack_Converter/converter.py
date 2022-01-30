@@ -1,6 +1,6 @@
 #######################################################
 #                                                     #
-# © 2022 - MPL 2.0 - Rsge - v2.0.0                    #
+# © 2022 - MPL 2.0 - Rsge - v2.0.1                    #
 # https://github.com/Rsge/Civ-V-EUI-Modpack-Converter #
 #                                                     #
 # WINDOWS ONLY!                                       #
@@ -136,6 +136,7 @@ if os.path.isdir(modpack_path):
 if os.path.isdir(eui_folder_path):
     shutil.rmtree(eui_folder_path)
 
+
 # Compile EUI with colored unlocked citizens
 if not os.path.isfile(modded_eui_zip_path):
     print("Creating colored unlocked citizens EUI...")
@@ -175,22 +176,20 @@ for file in globbed:
 for mod_file in g(mod_files, recursive = True):
     mod_file_name = get_file_name(mod_file)
     mod_file_folder = os.sep.join(mod_file.split(os.sep)[-3:-1])
-
     # IGE UI compat file
     if mod_file_name == ige_compat_file_name:
         print("Providing IGE-EUI-compat...")
         shutil.move(mod_file, mod_file + ".orig")
         shutil.copyfile(g(j(modsave_path, ige_compat_file_name + "*"))[0], mod_file)
-
+    # Find out if modcompat unit panel needed
+    elif mod_file_name in unit_panel_modcompat_file_names:
+        print("UnitPanel modcompat need detected...")
+        unit_panel_modcompat_needed = True
     # Delete UI overwrite duplicates
-    if mod_file_name in vanilla_ui_files:
+    elif mod_file_name in vanilla_ui_files:
         print("Removing overwriting file {}...".format(j(mod_file_folder, mod_file_name)))
         os.remove(mod_file)
 
-    # Find out if modcompat unit panel needed
-    if mod_file_name in unit_panel_modcompat_file_names:
-        print("UnitPanel modcompat need detected...")
-        unit_panel_modcompat_needed = True
 
 # Delete useless desktop.ini (Thanks True...)
 ini_files = re.sub(r"\.\w+$", ".ini", mod_files)
@@ -205,12 +204,9 @@ for ini_file in g(ini_files, recursive = True):
 for ui_file in g(ui_files):        
     ui_file_name = get_file_name(ui_file)
     print("Getting tags from " + ui_file_name + "...")
-
     load_tags[ui_file_name] = []
-    
     with open(ui_file, 'r') as file:
         lines = file.readlines()
-
     for line in lines:
         if line.startswith(load_tag):
             load_tags[ui_file_name].append(line)
@@ -218,7 +214,6 @@ for ui_file in g(ui_files):
 # Insert stuff into EUI files
 for eui_file in g(eui_files):
     eui_file_name = get_file_name(eui_file)
-
     # Base UI files
     if eui_file_name in load_tags.keys():
         print("Writing tags to " + eui_file_name + "...")

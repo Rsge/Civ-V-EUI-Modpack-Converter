@@ -3,12 +3,12 @@ A script for Civilization V to add Colored Unlocked Citizens (CUC) to Enhanced U
 The following things are assumed when running the script without changes:
 * Having [7-zip](https://www.7-zip.org/) installed in the standard programs directory.
 * Every pack being saved as a .7z or .rar archive.
-* Per default the following folder structure:
+* The following folder structure:
 	* _steamapps\common\Sid Meier's Civilization V\Assets\DLC\\_ \
 	EUI-Modpacks and EUI with CUC
 		* _zz_Vanilla_Versions\\_ \
 		Vanilla Modpacks and EUI
-	* This project's folder somewhere\\_ \
+	* This project's folder somewhere\\ \
 	Edited files
 		* _EUI_Modpack_Converter\\_ \
 		Script and project files
