@@ -166,8 +166,6 @@ do
 		end
 	end
 end
-ContextPtr:LoadNewContext("EvilSpiritsMission")
-ContextPtr:LoadNewContext("THTanukiMission")
 
 --==========================================================
 -- Tooltip Utilities
@@ -1468,3 +1466,5 @@ ContextPtr:SetShowHideHandler(
 ContextPtr:SetHide( false )
 
 end)
+ContextPtr:LoadNewContext("EvilSpiritsMission")
+ContextPtr:LoadNewContext("THTanukiMission")

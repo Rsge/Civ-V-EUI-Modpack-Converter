@@ -1,0 +1,23 @@
+(Delete previous MP_MODSPACK and EUI folder)
+(Create CUC EUI)
+Unzip EUI & modpack
+Replace:
+	IGE-Mod: IGE_Window.lua --> EUI compatible
+	EUI: UnitPanel.lua --> Mod compatible
+	EUI: CityBannerManager.lua, CityView.lua & Highlights.xml --> Colored unlocked citizens
+Add "ContextPtr:LoadNewContext"-Parts from old UI and mod files to UI_bc1 in:
+	CityView.lua
+	InGame.lua
+	LeaderHeadRoot.lua
+	UnitPanel.lua - manually, e.g.:
+		EvilSpiritsMission
+		THTanukiMission
+Move UI_bc1 folder to modpack folder
+Delete:
+	Default UI folder
+	Duplicate UI files in mods - e.g.:
+		BNW Mass Effect (v 7)\Dummy Building Folder\CivilopediaScreen.lua
+		BNW Mass Effect (v 7)\Dummy Building Folder\CityView.lua
+		Touhou - Evil Spirits (v 2)\Lua\UnitPanel.lua
+		Touhou - Probability Space Hypervessel (v 1)\Lua\TechTree.lua
+		Touhou - Probability Space Hypervessel (v 1)\Lua\TechButtonInclude.lua
