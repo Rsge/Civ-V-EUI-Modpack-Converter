@@ -420,6 +420,7 @@ local TeamCityTooltips = {
 	CityIsPuppet = "EUI_ItemTooltip",
 	CityIsRazing = "EUI_ItemTooltip",
 	CityIsResistance = "EUI_ItemTooltip",
+	CityResistanceTurns = "EUI_ItemTooltip",
 	CityIsConnected = "EUI_ItemTooltip",
 	CityIsBlockaded = "EUI_ItemTooltip",
 	CityIsOccupied = "EUI_ItemTooltip",
@@ -580,7 +581,7 @@ function RefreshCityBanner( city )
 		instance.CityIsRazing:SetHide( not isRazing )
 
 		-- In Resistance ?
-		instance.CityIsResistance:SetHide( not isResistance )
+		instance.CityIsResistance:SetHide( not isResistance or isRazing )
 
 		-- Puppet ?
 		instance.CityIsPuppet:SetHide( not isPuppet )
@@ -606,17 +607,23 @@ function RefreshCityBanner( city )
 
 			-- Update Growth
 			local foodStored100 = city:GetFoodTimes100()
-			local foodThreshold100 = city:GrowthThreshold() * 100
 			local foodPerTurn100 = city:FoodDifferenceTimes100( true )
 			local foodStoredPercent = 0
 			local foodStoredNextTurnPercent = 0
-			if foodThreshold100 > 0 then
-				foodStoredPercent = foodStored100 / foodThreshold100
-				foodStoredNextTurnPercent = ( foodStored100 + foodPerTurn100 ) / foodThreshold100
-				if foodPerTurn100 < 0 then
-					foodStoredPercent, foodStoredNextTurnPercent = foodStoredNextTurnPercent, foodStoredPercent
+
+			if isRazing then
+				foodPerTurn100 = -1
+			else
+				local foodThreshold100 = city:GrowthThreshold() * 100
+				if foodThreshold100 > 0 then
+					foodStoredPercent = foodStored100 / foodThreshold100
+					foodStoredNextTurnPercent = ( foodStored100 + foodPerTurn100 ) / foodThreshold100
+					if foodPerTurn100 < 0 then
+						foodStoredPercent, foodStoredNextTurnPercent = foodStoredNextTurnPercent, foodStoredPercent
+					end
 				end
 			end
+			instance.CityResistanceTurns:SetText( isRazing and city:GetRazingTurns() or isResistance and city:GetResistanceTurns() )
 
 			-- Update Growth Meter
 			instance.GrowthBar:SetPercent( max(min( foodStoredPercent, 1),0))
@@ -624,18 +631,16 @@ function RefreshCityBanner( city )
 			instance.GrowthBarStarve:SetHide( foodPerTurn100 >= 0 )
 
 			-- Update Growth Time
-			local turnsToCityGrowth = city:GetFoodTurnsLeft()
 			local growthText
 
 			if foodPerTurn100 < 0 then
-				turnsToCityGrowth = floor( foodStored100 / -foodPerTurn100 ) + 1
-				growthText = "[COLOR_WARNING_TEXT]" .. turnsToCityGrowth .. "[ENDCOLOR]"
+				growthText = "[COLOR_WARNING_TEXT]" .. min( floor( foodStored100 / -foodPerTurn100 ) + 1, 99 ) .. "[ENDCOLOR]"
 			elseif city:IsForcedAvoidGrowth() then
 				growthText = "[ICON_LOCKED]"
 			elseif foodPerTurn100 == 0 then
 				growthText = "-"
 			else
-				growthText = min(turnsToCityGrowth,99)
+				growthText = min( city:GetFoodTurnsLeft(),99 )
 			end
 
 			instance.CityGrowth:SetText( growthText )
@@ -670,7 +675,7 @@ function RefreshCityBanner( city )
 			local projectProductionID = city:GetProductionProject()
 			local processProductionID = city:GetProductionProcess()
 			local portraitIndex, portraitAtlas
-			local item = nil
+			local item
 
 			if unitProductionID ~= -1 then
 				item = GameInfo.Units[unitProductionID]
@@ -682,10 +687,13 @@ function RefreshCityBanner( city )
 			elseif processProductionID ~= -1 then
 				item = GameInfo.Processes[processProductionID]
 			end
-			-- really should have an error texture
 
-			instance.CityProduction:SetHide( not( item and
-				IconHookup( portraitIndex or item.PortraitIndex, 45, portraitAtlas or item.IconAtlas, instance.CityProduction )))
+			if item then
+				instance.CityProduction:SetHide( not( item and IconHookup( portraitIndex or item.PortraitIndex, 45, portraitAtlas or item.IconAtlas, instance.CityProduction )))
+			else
+				instance.CityProduction:SetTexture( "CityBannerGrowthBackground.dds" )--"yieldproduction64.dds"  "CityBannerProductionImage.dds"
+				instance.CityProduction:SetTextureOffsetVal( -6, 10 ) --9, 9 )
+			end
 
 			-- Focus?
 			if isRazing or isResistance or isPuppet then

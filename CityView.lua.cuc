@@ -34,9 +34,6 @@ local StackInstanceManager = StackInstanceManager
 include "ShowProgress"
 local ShowProgress = ShowProgress
 
-include "SupportFunctions"
-local TruncateString = TruncateString
-
 if IsCiv5BNW then
 	include "GreatPeopleIcons"
 end
@@ -134,7 +131,7 @@ local g_GreatWorksIM	= StackInstanceManager( "Work", "Button", false )
 local g_SpecialistsIM	= StackInstanceManager( "Slot", "Button", false )
 
 local g_ProdQueueIM, g_SpecialBuildingsIM, g_GreatWorkIM, g_WondersIM, g_BuildingsIM, g_GreatPeopleIM, g_SlackerIM, g_UnitSelectIM, g_BuildingSelectIM, g_WonderSelectIM, g_ProcessSelectIM, g_FocusSelectIM
-local g_queuedItemNumber, g_isDebugMode, g_BuyPlotMode, g_previousCity, g_isButtonPopupChooseProduction, g_isScreenAutoClose, g_isResetCityPlotPurchase
+local g_queuedItemNumber, g_isDebugMode, g_BuyPlotMode, g_previousCity, g_isButtonPopupChooseProduction, g_isScreenAutoClose, g_isResetCityPlotPurchase, g_isNextCityProduction
 
 local g_citySpecialists = {}
 
@@ -503,6 +500,7 @@ local function OnSlackersSelected( buildingID, slotID )
 		for _=1, slotID<=0 and city:GetSpecialistCount( GameDefines.DEFAULT_SPECIALIST ) or 1 do
 			Network.SendDoTask( city:GetID(), TaskTypes.TASK_REMOVE_SLACKER, 0, -1, false )
 		end
+		return Network.SendUpdateCityCitizens( city:GetID() )
 	end
 end
 
@@ -525,12 +523,14 @@ local function ToggleSpecialist( buildingID, slotID )
 			if city:GetNumSpecialistsInBuilding(buildingID) > 0 then
 				specialistTable[slotID] = false
 				specialistTable.n = specialistTable.n - 1
-				return Game.SelectedCitiesGameNetMessage( GameMessageTypes.GAMEMESSAGE_DO_TASK, TaskTypes.TASK_REMOVE_SPECIALIST, specialistID, buildingID )
+				Game.SelectedCitiesGameNetMessage( GameMessageTypes.GAMEMESSAGE_DO_TASK, TaskTypes.TASK_REMOVE_SPECIALIST, specialistID, buildingID )
+				return Network.SendUpdateCityCitizens( city:GetID() )
 			end
 		elseif city:IsCanAddSpecialistToBuilding(buildingID) then
 			specialistTable[slotID] = true
 			specialistTable.n = specialistTable.n + 1
-			return Game.SelectedCitiesGameNetMessage( GameMessageTypes.GAMEMESSAGE_DO_TASK, TaskTypes.TASK_ADD_SPECIALIST, specialistID, buildingID )
+			Game.SelectedCitiesGameNetMessage( GameMessageTypes.GAMEMESSAGE_DO_TASK, TaskTypes.TASK_ADD_SPECIALIST, specialistID, buildingID )
+			return Network.SendUpdateCityCitizens( city:GetID() )
 		end
 	end
 end
@@ -943,14 +943,17 @@ local g_SelectionListCallBacks = {
 					Events.SpecificCityInfoDirty( cityOwnerID, city:GetID(), CityUpdateTypes.CITY_UPDATE_TYPE_PRODUCTION )
 					if g_isButtonPopupChooseProduction then
 						-- is there another city without production order ?
-						for cityX in g_activePlayer:Cities() do
-							if cityX ~= city and not cityX:IsPuppet() and cityX:GetOrderQueueLength() < 1 then
-								UI.SelectCity( cityX )
-								return UI.LookAtSelectionPlot()
+						if g_isNextCityProduction then
+							for cityX in g_activePlayer:Cities() do
+								if cityX ~= city and not cityX:IsPuppet() and cityX:GetOrderQueueLength() < 1 then
+									UI.SelectCity( cityX )
+									return UI.LookAtSelectionPlot()
+								end
 							end
 						end
-						-- all cities are producing...
-						return ExitCityScreen()
+						if g_isScreenAutoClose then
+							return ExitCityScreen()
+						end
 					end
 				end
 			end
@@ -1277,7 +1280,7 @@ local function BuyPlotAnchorButtonClicked( plotIndex )
 		local plot = city:GetCityIndexPlot( plotIndex )
 		local plotX = plot:GetX()
 		local plotY = plot:GetY()
-		Network.SendCityBuyPlot(city:GetID(), plotX, plotY)
+		Network.SendCityBuyPlot( city:GetID(), plotX, plotY )
 		Network.SendUpdateCityCitizens( city:GetID() )
 		UI.UpdateCityScreen()
 		Events.AudioPlay2DSound("AS2D_INTERFACE_BUY_TILE")
@@ -1519,7 +1522,6 @@ local function UpdateCityView()
 		-------------------------------------------
 
 		local isCapital = city:IsCapital()
-		Controls.CityCapitalIcon:SetHide( not isCapital )
 
 		Controls.CityIsConnected:SetHide( isCapital or city:IsBlockaded() or not cityOwner:IsCapitalConnectedToCity(city) or city:GetTeam() ~= Game.GetActiveTeam() )
 
@@ -1545,14 +1547,14 @@ local function UpdateCityView()
 		Controls.CityIsOccupied:SetHide( not( IsCiv5 and city:IsOccupied() and not city:IsNoOccupiedUnhappiness() ) )
 
 		local cityName = Locale.ToUpper( city:GetName() )
-
+		if isCapital then
+			cityName = "[ICON_CAPITAL]" .. cityName
+		end
 		if city:IsRazing() then
 			cityName = cityName .. " (" .. L"TXT_KEY_BURNING" .. ")"
 		end
 
-		local size = isCapital and Controls.CityCapitalIcon:GetSizeX() or 0
-		Controls.CityNameTitleBarLabel:SetOffsetX( size / 2 )
-		TruncateString( Controls.CityNameTitleBarLabel, abs(Controls.NextCityButton:GetOffsetX()) * 2 - Controls.NextCityButton:GetSizeX() - size, cityName )
+		Controls.CityNameTitleBarLabel:SetText( cityName )
 
 		Controls.Defense:SetText( floor( city:GetStrengthValue() / 100 ) )
 
@@ -1980,7 +1982,8 @@ end
 
 local function UpdateOptionsAndCityView()
 	g_isAdvisor = UserInterfaceSettings.CityAdvisor ~= 0
-	g_isScreenAutoClose = UserInterfaceSettings.ScreenAutoClose ~= 0
+	g_isScreenAutoClose = UserInterfaceSettings.CityScreenAutoClose ~= 0
+	g_isNextCityProduction = UserInterfaceSettings.NextCityProduction ~= 0
 	g_isResetCityPlotPurchase = UserInterfaceSettings.ResetCityPlotPurchase ~= 0
 	g_FocusSelectIM.Collapse( not OptionsManager.IsNoCitizenWarning() )
 	return UpdateCityView()
@@ -2205,7 +2208,7 @@ AddSerialEventGameMessagePopup( function( popupInfo )
 			if orderID >= 0 and itemID >= 0 then
 				g_finishedItems[ cityID ] = { orderID, itemID }
 			end
-			g_isButtonPopupChooseProduction = g_isScreenAutoClose
+			g_isButtonPopupChooseProduction = true
 			return UI.DoSelectCityAtPlot( city:Plot() )	-- open city screen
 		end
 	end

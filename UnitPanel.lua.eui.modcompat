@@ -31,11 +31,11 @@ local bnw_mode = Game.GetActiveLeague ~= nil
 
 local ceil = math.ceil
 local floor = math.floor
+local min = math.min
 local max = math.max
 local pairs = pairs
 --local print = print
 local format = string.format
-local concat = table.concat
 local insert = table.insert
 local remove = table.remove
 local tostring = tostring
@@ -123,10 +123,10 @@ local g_cityFocusIcons = {
 
 local g_UnitTypeOrder = {}
 do
-	local i = 1
+	local i = 0
 	for unit in GameInfo.Units() do
+		i = i + 65536
 		g_UnitTypeOrder[ unit.ID ] = i
-		i = i + 1
 	end
 end
 
@@ -258,6 +258,11 @@ end
 
 local function UpdateCity( city, instance )
 	if city and instance then
+		local isNotPuppet = not city:IsPuppet()
+		local isRazing = city:IsRazing()
+		local isResistance = city:IsResistance()
+		local isCapital = city:IsCapital()
+
 		local itemInfo, portraitOffset, portraitAtlas, buildPercent
 		local turnsRemaining = city:GetProductionTurnsLeft()
 		local productionNeeded = city:GetProductionNeeded()
@@ -280,47 +285,40 @@ local function UpdateCity( city, instance )
 			itemInfo = IconHookup( portraitOffset or itemInfo.PortraitIndex, 64, portraitAtlas or itemInfo.IconAtlas, instance.CityProduction )
 			if productionNeeded > 0 then
 				buildPercent = 1 - max( 0, storedProduction/productionNeeded )
-			else
-				buildPercent = 0
 			end
-			instance.BuildMeter:SetPercents( 0, buildPercent )
-		else
-			turnsRemaining = nil
+			instance.BuildMeter:SetPercents( 0, buildPercent or 0 )
 		end
 		instance.CityProduction:SetHide( not itemInfo )
-		instance.BuildGrowth:SetString( turnsRemaining )
+		instance.BuildGrowth:SetString( itemInfo and not isResistance and not isRazing and turnsRemaining )
 		instance.CityPopulation:SetString( city:GetPopulation() )
 		local foodPerTurnTimes100 = city:FoodDifferenceTimes100()
-		if foodPerTurnTimes100 < 0 then
-			instance.CityGrowth:SetString( " [COLOR_RED]" .. (floor( city:GetFoodTimes100() / -foodPerTurnTimes100 ) + 1) .. "[ENDCOLOR] " )
+		if isRazing or foodPerTurnTimes100 < 0 then
+			instance.CityGrowth:SetString( "[COLOR_RED]" .. (isRazing and 1 or min( floor( ( city:GetFoodTimes100() ) / -foodPerTurnTimes100 ) + 1, 99 ) ) .. "[ENDCOLOR]" )
 		elseif city:IsForcedAvoidGrowth() then
 			instance.CityGrowth:SetString( "[ICON_LOCKED]" )
 		elseif city:IsFoodProduction() or foodPerTurnTimes100 == 0 then
 			instance.CityGrowth:SetString()
 		else
-			instance.CityGrowth:SetString( " "..city:GetFoodTurnsLeft().." " )
+			instance.CityGrowth:SetString( min( city:GetFoodTurnsLeft(), 99 ) )
 		end
-
-		local isNotPuppet = not city:IsPuppet()
-		local isNotRazing = not city:IsRazing()
-		local isNotResistance = not city:IsResistance()
-		local isCapital = city:IsCapital()
 
 		instance.CityIsCapital:SetHide( not isCapital )
 		instance.CityIsPuppet:SetHide( isNotPuppet )
-		instance.CityFocus:SetText( isNotRazing and isNotPuppet and g_cityFocusIcons[city:GetFocusType()] )
+		instance.CityFocus:SetText( not isRazing and isNotPuppet and g_cityFocusIcons[city:GetFocusType()] )
 		instance.CityQuests:SetText( city:GetWeLoveTheKingDayCounter() > 0 and "[ICON_HAPPINESS_1]" or (GameInfo.Resources[city:GetResourceDemanded()] or {}).IconString )
-		instance.CityIsRazing:SetHide( isNotRazing )
-		instance.CityIsResistance:SetHide( isNotResistance )
+		instance.CityIsRazing:SetHide( not isRazing )
+		instance.CityIsResistance:SetHide( not isResistance )
+		instance.CityResistanceTurns:SetText( isRazing and city:GetRazingTurns() or isResistance and city:GetResistanceTurns() )
 		instance.CityIsConnected:SetHide( isCapital or not g_activePlayer:IsCapitalConnectedToCity( city ) )
 		instance.CityIsBlockaded:SetHide( not city:IsBlockaded() )
 		instance.CityIsOccupied:SetHide( not city:IsOccupied() or city:IsNoOccupiedUnhappiness() )
-		instance.Name:SetString( city:GetName() )
-
+		instance.CityName:SetString( city:GetName() )
+		local religion = city.GetReligiousMajority and GameInfo.Religions[city:GetReligiousMajority()]
+		instance.CityReligion:SetString( religion and religion.IconString )
 		local culturePerTurn = city:GetJONSCulturePerTurn()
 		instance.BorderGrowth:SetString( culturePerTurn > 0 and ceil( (city:GetJONSCultureThreshold() - city:GetJONSCultureStored()) / culturePerTurn ) )
 
-		local percent = 1 - city:GetDamage() / ( gk_mode and city:GetMaxHitPoints() or GameDefines.MAX_CITY_HIT_POINTS )
+		local percent = 1 - city:GetDamage() / ( city.GetMaxHitPoints and city:GetMaxHitPoints() or GameDefines.MAX_CITY_HIT_POINTS )
 		instance.Button:SetColor( Color( 1, percent, percent, 1 ) )
 	end
 end
@@ -426,7 +424,7 @@ g_unitsIM, g_units = g_RibbonManager( "UnitInstance", Controls.UnitStack, Contro
 		for unit in g_activePlayer:Units() do
 			if FilterUnit( unit ) then
 				unitID = unit:GetID()
-				Create( unit, unitID, g_UnitTypeOrder[unit:GetUnitType()] * 65536 + unitID % 65536 )
+				Create( unit, unitID, g_UnitTypeOrder[unit:GetUnitType()] + unitID % 65536 )
 			end
 		end
 		Controls.UnitStack:SortChildren( SortByVoid2 )
@@ -503,6 +501,7 @@ g_citiesIM, g_cities = g_RibbonManager( "CityInstance", Controls.CityStack, Cont
 		CityIsRazing = "EUI_ItemTooltip",
 		CityIsConnected = "EUI_ItemTooltip",
 		CityIsBlockaded = "EUI_ItemTooltip",
+		CityReligion = "EUI_ItemTooltip",
 		CityFocus = "EUI_ItemTooltip",
 		CityGrowth = "EUI_ItemTooltip",
 		CityQuests = "EUI_ItemTooltip",
@@ -652,6 +651,7 @@ local function ResizeCityUnitRibbons()
 		Controls.CityStack:ChangeParent( Controls.CityPanel )
 	end
 	Controls.CityPanel:ReprocessAnchoring()
+	Controls.DarkBorders:SetSizeY( cityStackHeight+g_topOffset )
 --		Controls.CityPanel:SetSizeY( cityStackHeight )
 
 	Controls.UnitScrollPanel:SetHide( not unitStackHeight )
@@ -768,7 +768,7 @@ local function CreateUnit( playerID, unitID ) --hexVec, unitType, cultureType, c
 		if unit then
 			AddUnitType( unit, unitID )
 			if FilterUnit( unit ) then
-				g_unitsIM.Create( unit, unitID, g_UnitTypeOrder[unit:GetUnitType()] + unitID / 65536 )
+				g_unitsIM.Create( unit, unitID, g_UnitTypeOrder[unit:GetUnitType()] + unitID % 65536 )
 				Controls.UnitStack:SortChildren( SortByVoid2 )
 				return ResizeCityUnitRibbons()
 			end
@@ -864,7 +864,6 @@ local function UnitActionToolTip( button )
 end
 
 local function UpdateUnitPanel()
-	actionIM:ResetInstances()
 	-- Retrieve the currently selected unit.
 	local unit = GetHeadSelectedUnit()
 -- Events.GameplayAlertMessage( "SerialEventUnitInfoDirty, GetHeadSelectedUnit=".. tostring(unit and unit:GetName())..", last unit="..tostring(g_lastUnit and g_lastUnit:GetName()) )
@@ -1007,6 +1006,7 @@ local function UpdateUnitPanel()
 		
 		--==========================================================
 
+		
 		for actionID = 0, #GameInfoActions do
 			action = GameInfoActions[ actionID ]
 			if action and action.Visible ~= false then
@@ -1111,7 +1111,7 @@ local function UpdateUnitPanel()
 		end
 
 		-- Unit XP
-		if unit:IsCombatUnit() or unit:GetDomainType() == DomainTypes.DOMAIN_AIR then
+		if unit:IsCombatUnit() or unit:CanAirAttack() then
 			local iLevel = unit:GetLevel()
 			local iExperience = unit:GetExperience()
 			local iExperienceNeeded = unit:ExperienceNeeded()
@@ -1310,6 +1310,7 @@ local function UpdateOptions()
 	end
 	g_citiesIM.Initialize( option )
 	Controls.CityPanel:SetHide( option )
+	Controls.DarkBorders:SetHide( option )
 
 	UpdateUnitPanel()
 	ResizeCityUnitRibbons()
@@ -1464,7 +1465,6 @@ ContextPtr:SetShowHideHandler(
 		end
 	end)
 ContextPtr:SetHide( false )
+Controls.DarkBorders:ChangeParent( LookUpControl( "/Ingame/WorldViewControls" ) )
 
 end)
-ContextPtr:LoadNewContext("EvilSpiritsMission")
-ContextPtr:LoadNewContext("THTanukiMission")
