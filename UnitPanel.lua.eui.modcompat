@@ -864,6 +864,7 @@ local function UnitActionToolTip( button )
 end
 
 local function UpdateUnitPanel()
+	actionIM:ResetInstances()					  
 	-- Retrieve the currently selected unit.
 	local unit = GetHeadSelectedUnit()
 -- Events.GameplayAlertMessage( "SerialEventUnitInfoDirty, GetHeadSelectedUnit=".. tostring(unit and unit:GetName())..", last unit="..tostring(g_lastUnit and g_lastUnit:GetName()) )
