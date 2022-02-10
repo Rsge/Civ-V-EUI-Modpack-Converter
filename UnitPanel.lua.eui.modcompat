@@ -166,6 +166,7 @@ do
 		end
 	end
 end
+--Insert ContextPtr for modded unit panel buttons here
 
 --==========================================================
 -- Tooltip Utilities
