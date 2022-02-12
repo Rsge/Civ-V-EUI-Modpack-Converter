@@ -1,6 +1,6 @@
 ########################################################################
 #                                                                      #
-# © 2021 - MPL 2.0 - Rsge - v1.0.0                                     #
+# © 2021 - MPL 2.0 - Rsge - v1.0.1                                     #
 # https://github.com/Rsge/Civ-V-EUI-Modpack-Converter                  #
 #                                                                      #
 # WINDOWS ONLY!                                                        #
@@ -10,6 +10,42 @@
 #                                                                      #
 ########################################################################
 
+
+#-----------------------------------------#
+# Customize these according to your setup #
+#-----------------------------------------#
+
+# Vanilla EUI file (in vanilla_packs_folder)
+vanilla_eui_zip = "!EUI.7z"
+
+# CUC-version file name of EUI
+modded_eui_zip = "!EUI_CUC.7z"
+
+# Folder containing this scripts project folder and it's needed edited files
+modsave_folder = "zzz_Modsaves"
+
+# Folder containing the vanilla packs
+vanilla_packs_folder = "zz_Vanilla_Versions"
+
+#-------------------------------------------#
+# Maybe you also need to add to these lists #
+#-------------------------------------------#
+
+# Mod files overwriting original UI files, conflicting with EUI
+delete_file_names = ["CivilopediaScreen.lua",
+                     "CityView.lua",
+                     "TechTree.lua",
+                     "TechButtonInclude.lua"]
+
+# Mod files adding new actions to units
+unit_panel_modcompat_file_names = ["EvilSpiritsMission.lua",
+                                   "THTanukiMission.lua"]
+
+#----------------------------------------------------#
+# Don't change anything after here                   #
+# [except if you know what you're doing of cause ;)] #
+#----------------------------------------------------#
+
 # Imports
 import os
 from os.path import join as j
@@ -18,17 +54,12 @@ import subprocess
 import shutil
 import re
 
+# Change to base DLC directory
+os.chdir("../..")
 
 ## Global Values
 print("Configuring variables...")
-
 # Names
-# Customize these according to your setup #
-vanilla_eui_zip = "!EUI.7z" # Vanilla EUI file (in vanilla_packs_folder)
-modded_eui_zip = "!EUI_CUC.7z" # CUC-version file name of EUI
-modsave_folder = "zzz_Modsaves" # Folder containing this scripts project folder and it's needed edited files
-vanilla_packs_folder = "zz_Vanilla_Versions" # Folder containing the vanilla packs
-# Ignore these #
 modpack_folder_name = "MP_MODSPACK"
 eui_cuc_file_names = ["CityBannerManager.lua",
                      "CityView.lua",
@@ -36,23 +67,7 @@ eui_cuc_file_names = ["CityBannerManager.lua",
 load_tag = "ContextPtr:LoadNewContext"
 unit_panel_file_name = "UnitPanel.lua"
 ige_compat_file_name = "IGE_Window.lua"
-# Maybe you also need to add to these lists #
-delete_file_names = ["CivilopediaScreen.lua", # Mod files overwriting original UI files, conflicting with EUI
-                     "CityView.lua",
-                     "TechTree.lua",
-                     "TechButtonInclude.lua",
-                     unit_panel_file_name]
-unit_panel_modcompat_file_names = ["EvilSpiritsMission.lua", # Mod files adding new actions to units
-                                   "THTanukiMission.lua"]
-
-# Don't change from here [if you don't really know what you're doing that is of cause ;)] #
-
-# This only runs with 7zip. If you want to use WinRar you'll have to change the methods yourself - or just download 7zip =P
-szip = r"C:\Program Files\7-Zip\7z.exe"
-
 # Paths
-# Change to base DLC directory
-os.chdir("../..")
 base_path = os.getcwd()
 modsave_path = j(base_path, modsave_folder)
 modpack_path = j(base_path, modpack_folder_name)
@@ -60,11 +75,14 @@ vanilla_packs_path =  j(base_path, vanilla_packs_folder)
 ui_path = j(modpack_path, "UI")
 eui_path = j(base_path, "UI_bc1")
 # Files
+file_ext = "*.lua"
 base_eui_zip_path = j(vanilla_packs_path, vanilla_eui_zip)
 modded_eui_zip_path = j(base_path, modded_eui_zip)
-mod_files = j(modpack_path, "Mods", "**", "*.lua")
-ui_files = j(ui_path, "*.lua")
-eui_files = j(eui_path, "*", "*.lua")
+mod_files = j(modpack_path, "Mods", "**", file_ext)
+ui_files = j(ui_path, file_ext)
+eui_files = j(eui_path, "*", file_ext)
+# This only runs with 7zip. If you want to use WinRar you'll have to change the methods yourself - or just download 7zip =P
+szip = r"C:\Program Files\7-Zip\7z.exe"
 
 # Global Variables
 load_tags = {}
@@ -72,6 +90,12 @@ unit_panel_modcompat_needed = False
 null = open(os.devnull, 'w')
 eui_only = False
 
+# Quitting function
+def quit():
+    null.close()
+    print("Done.\n")
+    input("Press Enter to exit. . .")
+    exit(0)
 
 # Get modpack zip
 while True:
@@ -113,9 +137,7 @@ elif not eui_only:
 if eui_only:
     if os.path.isdir(eui_path):
         shutil.rmtree(eui_path)
-    null.close()
-    print("Done.\n")
-    exit(0)
+    quit()
 
 
 # Unzip modpack zip
@@ -158,14 +180,10 @@ for ini_file in g(ini_files, recursive = True):
 for ui_file in g(ui_files):
     with open(ui_file, 'r') as file:
         lines = file.readlines()
-        
     ui_file_path = ui_file.split(os.sep)
     ui_file_name = ui_file_path[len(ui_file_path) - 1]
-
     print("Getting tags from " + ui_file_name + "...")
-
     load_tags[ui_file_name] = []
-
     for line in lines:
         if line.startswith(load_tag):
             load_tags[ui_file_name].append(line)
@@ -174,7 +192,6 @@ for ui_file in g(ui_files):
 for eui_file in g(eui_files):
     eui_file_path = eui_file.split(os.sep)
     eui_file_name = eui_file_path[len(eui_file_path) - 1]
-
     # Base UI files
     if eui_file_name in load_tags.keys():
         print("Writing tags to " + eui_file_name + "...")
@@ -199,12 +216,5 @@ shutil.rmtree(ui_path)
 print("Zipping Modpack...")
 subprocess.run([szip, 'a', modpack_name + "_EUI.7z", modpack_path], stdout=null, stderr=null)
 
-## Move modpack folder
-#print("Moving Modspack folder")
-#shutil.move(modpack_path, j(base_path, modpack_folder_name))
-
 #Finishing up
-null.close()
-print("Done.\n")
-input("Press Enter to exit. . .")
-exit(0)
+quit()

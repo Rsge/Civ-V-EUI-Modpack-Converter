@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ea28d07f-cd43-45d1-b01d-1eeeb360d215</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>converter_new_WIP.py</StartupFile>
+    <StartupFile>converter.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -24,7 +24,7 @@
     <Content Include="Process.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="converter_new_WIP.py" />
+    <Compile Include="converter.py" />
     <Compile Include="converter_legacy.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
