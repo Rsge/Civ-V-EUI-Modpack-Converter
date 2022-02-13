@@ -1,6 +1,6 @@
 ########################################################################
 #                                                                      #
-# © 2021 - MPL 2.0 - Rsge - v2.1.0                                     #
+# © 2021 - MPL 2.0 - Rsge - v2.1.1                                     #
 # https://github.com/Rsge/Civ-V-EUI-Modpack-Converter                  #
 #                                                                      #
 # WINDOWS ONLY!                                                        #
@@ -84,7 +84,7 @@ print("Configuring variables...")
 # Names
 modpack_folder_name = "MP_MODSPACK"
 preservation_extension = ".orig"
-load_tag = "ContextPtr:LoadNewContext"
+load_tag_marker = "ContextPtr:LoadNewContext"
 unit_panel_tag = "LuaEvents.UnitPanelActionAddin"
 unit_panel_insert_marker = "--Insert ContextPtr for modded unit panel buttons here\n"
 eui_cuc_file_names = ["CityBannerManager.lua",
@@ -191,7 +191,7 @@ for mod_file in g(mod_files, recursive = True):
         shutil.copyfile(g(j(modsave_path, ige_compat_file_name + "*"))[0], mod_file)
     # Delete UI overwrite duplicates
     elif mod_file_name in vanilla_ui_file_names:
-        print("\tRemoving overwriting file \"{}\"...".format(mod_file_short_path))
+        print('\tRemoving overwriting file "{}"...'.format(mod_file_short_path))
         os.remove(mod_file)
     # Get unit panel addon files
     else:
@@ -199,7 +199,7 @@ for mod_file in g(mod_files, recursive = True):
             lines = file.readlines()
         for line in lines:
             if unit_panel_tag in line:
-                print("\tDetecting unit panel addon in file \"{}\"...".format(mod_file_short_path))
+                print('\tDetecting unit panel addon in file "{}"...'.format(mod_file_short_path))
                 unit_panel_addon_file_names.append(mod_file_name)
                 break
 
@@ -221,7 +221,7 @@ for ui_file in g(ui_files):
     with open(ui_file, 'r') as file:
         lines = file.readlines()
     for line in lines:
-        if line.startswith(load_tag):
+        if line.startswith(load_tag_marker):
             load_tags[ui_file_name].append(line)
 
 # Insert stuff into EUI files
@@ -239,7 +239,7 @@ for eui_file in g(eui_files):
         print("Providing EUI-UnitPanel-Modcompat...")
         unit_panel_load_tags = ""
         for unit_panel_addon_file_name in unit_panel_addon_file_names:
-            unit_panel_load_tags += "{}(\"{}\")\n".format(load_tag, p.splitext(unit_panel_addon_file_name)[0])
+            unit_panel_load_tags += '{}("{}")\n'.format(load_tag_marker, p.splitext(unit_panel_addon_file_name)[0])
         shutil.move(eui_file, eui_file + preservation_extension)
         shutil.copyfile(g(j(modsave_path, unit_panel_file_name + "*"))[0], eui_file)
         with open(eui_file, 'r') as file:

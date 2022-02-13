@@ -1,6 +1,6 @@
 ########################################################################
 #                                                                      #
-# © 2021 - MPL 2.0 - Rsge - v1.0.1                                     #
+# © 2021 - MPL 2.0 - Rsge - v1.0.2                                     #
 # https://github.com/Rsge/Civ-V-EUI-Modpack-Converter                  #
 #                                                                      #
 # WINDOWS ONLY!                                                        #
@@ -22,6 +22,7 @@ vanilla_eui_zip = "!EUI.7z"
 modded_eui_zip = "!EUI_CUC.7z"
 
 # Folder containing this scripts project folder and it's needed edited files
+# (Sid Meier's Civilization V\Assets\DLC\ThisVariableAsFolderName)
 modsave_folder = "zzz_Modsaves"
 
 # Folder containing the vanilla packs
