@@ -1,6 +1,6 @@
-# Civilization V EUI Modpack Converter
+# Civilization V Modpack UI Converter
 A script for Civilization V to add Enhanced User Interface (EUI) to MPMPM modpacks.
-Also adds EUI compatibility for the InGameEditor (IGE) mod and 
+Also adds EUI compatibility for the InGameEditor (IGE) mod and the Improved EUI addon (Colored Unlocked Citizens).
 
 The following things are assumed when running the script without changes:
 * Having [7-zip](https://www.7-zip.org/) installed in the standard programs directory.

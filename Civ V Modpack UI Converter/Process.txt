@@ -10,8 +10,8 @@ Add "ContextPtr:LoadNewContext"-Parts from old UI and mod files to UI_bc1 in:
 	InGame.lua
 	LeaderHeadRoot.lua
 	UnitPanel.lua - manually, e.g.:
-		EvilSpiritsMission
-		THTanukiMission
+		EvilSpiritsMission (Touhou - Evil Spirits)
+		THTanukiMission (Touhou - Tanuki)
 Move UI_bc1 folder to modpack folder
 Delete:
 	Default UI folder

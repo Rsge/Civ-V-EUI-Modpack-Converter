@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "EUI_Modpack_Converter", "EUI_Modpack_Converter.pyproj", "{EA28D07F-CD43-45D1-B01D-1EEEB360D215}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Civ V Modpack UI Converter", "Civ V Modpack UI Converter.pyproj", "{EA28D07F-CD43-45D1-B01D-1EEEB360D215}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{081253F6-C547-4C81-B928-0D7472199986}"
 	ProjectSection(SolutionItems) = preProject
