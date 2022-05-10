@@ -3,8 +3,9 @@ A script for Civilization V to add Enhanced User Interface (EUI) to MPMPM modpac
 Also adds EUI compatibility for the InGameEditor (IGE) mod and the Improved EUI addon (Colored Unlocked Citizens).
 
 The following things are assumed when running the script without changes:
-* Having [7-zip](https://www.7-zip.org/) installed in the standard programs directory.
-* Every pack being saved as a .7z or .rar archive.
+* Having Civilization V installed through Steam.
+* Having [7-zip](https://www.7-zip.org/) installed.
+* Every pack being saved as an archive file. (.7z, .rar, .zip, ...)
 * The following folder structure:
 	* _steamapps\common\Sid Meier's Civilization V\Assets\DLC\\_ \
 	EUI-Modpacks and EUI with CUC
@@ -12,7 +13,7 @@ The following things are assumed when running the script without changes:
 		Vanilla Modpacks and EUI
 	* This project's folder somewhere\\ \
 	Edited files
-		* _EUI_Modpack_Converter\\_ \
+		* A folder in there\\ \
 		Script and project files
 
 ### Credits
