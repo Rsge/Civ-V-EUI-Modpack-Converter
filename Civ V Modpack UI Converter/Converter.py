@@ -1,6 +1,6 @@
 ########################################################################
 #                                                                      #
-# © 2021 - MPL 2.0 - Rsge - v2.1.1                                     #
+# © 2021 - MPL 2.0 - Rsge - v2.1.2                                     #
 # https://github.com/Rsge/Civ-V-EUI-Modpack-Converter                  #
 #                                                                      #
 # WINDOWS ONLY!                                                        #
@@ -27,7 +27,7 @@ vanilla_packs_folder = "zz_Vanilla_Versions"
 
 #----------------------------------------------------#
 # Don't change anything after here                   #
-# [except if you know what you're doing of cause ;)] #
+# [except if you know what you're doing of course ;)] #
 #----------------------------------------------------#
 
 # Imports

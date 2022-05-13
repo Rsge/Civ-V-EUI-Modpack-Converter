@@ -1,6 +1,6 @@
 ########################################################################
 #                                                                      #
-# © 2021 - MPL 2.0 - Rsge - v1.0.2                                     #
+# © 2021 - MPL 2.0 - Rsge - v1.0.3                                     #
 # https://github.com/Rsge/Civ-V-EUI-Modpack-Converter                  #
 #                                                                      #
 # WINDOWS ONLY!                                                        #
@@ -44,7 +44,7 @@ unit_panel_modcompat_file_names = ["EvilSpiritsMission.lua",
 
 #----------------------------------------------------#
 # Don't change anything after here                   #
-# [except if you know what you're doing of cause ;)] #
+# [except if you know what you're doing of course ;)] #
 #----------------------------------------------------#
 
 # Imports
