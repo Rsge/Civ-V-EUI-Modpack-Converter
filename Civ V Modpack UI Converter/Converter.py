@@ -25,10 +25,10 @@ modded_eui_zip = "!EUI_CUC.7z"
 # (Sid Meier's Civilization V\Assets\DLC\ThisVariableAsFolderName)
 vanilla_packs_folder = "zz_Vanilla_Versions" 
 
-#----------------------------------------------------#
-# Don't change anything after here                   #
+#-----------------------------------------------------#
+# Don't change anything after here                    #
 # [except if you know what you're doing of course ;)] #
-#----------------------------------------------------#
+#-----------------------------------------------------#
 
 # Imports
 import os
